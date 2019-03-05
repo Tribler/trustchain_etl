@@ -33,8 +33,13 @@ if __name__ == '__main__':
 
     sql_db = SQLiteTrustchainExtractor(DB_DIR, OFFSET)
     neo_db = Neo4JDB(NEO_URL, NEO_USER, NEO_PASS)
+    if not neo_db.create_indexes():
+        print("Cannot create index on neo database ")
+        exit(1)
+
     if not sql_db.is_connected():
         print("Cannot open sqlite database @ " + str(DB_DIR))
+        exit(1)
 
     while True:
         print("Reading transactions from sql database")
