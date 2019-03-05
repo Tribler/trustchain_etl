@@ -9,9 +9,6 @@ NEO4J_DB_QUERY = "UNWIND {v} as tx " \
                  "CREATE (a)-[dr:DOWN {amount:tx.down}]->(tx_val) " \
                  "CREATE (b)-[ur:UP {amount:tx.up}]->(tx_val)"
 
-INDEX_QUERY = "CREATE INDEX ON :Peer(key)" \
-              "CREATE INDEX ON :Transaction(time)"
-
 
 class Neo4JDB(object):
 
@@ -19,7 +16,8 @@ class Neo4JDB(object):
         self._graph = Graph(url, auth=(user, password))
 
     def create_indexes(self):
-        return self._graph.run(INDEX_QUERY)
+        return self._graph.run("CREATE INDEX ON :Peer(key)") \
+               and  self._graph.run("CREATE INDEX ON :Transaction(time)")
 
     def push_batch(self, batch):
         """
