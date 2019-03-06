@@ -13,10 +13,10 @@ if __name__ == '__main__':
     parser.add_argument("-n", "--neo_db", help="Neo4j db address",
                         default="bolt://0.0.0.0:7687")
     parser.add_argument("--neo_user", help="Neo4j user", default="neo4j")
-    parser.add_argument("--neo_pass", help="Neo4j pass", default="neo4j")
+    parser.add_argument("--neo_pass", help="Neo4j pass", default="123")
 
     parser.add_argument("-o", '--offset', help="SQLite offset", type=int, default=0)
-    parser.add_argument("-t", '--tx_count', help="Batch size to read from db", type=int, default=20000)
+    parser.add_argument("-t", '--tx_count', help="Batch size to read from db", type=int, default=5000)
     args = parser.parse_args()
 
     DB_DIR = args.sql_db
@@ -33,12 +33,12 @@ if __name__ == '__main__':
 
     sql_db = SQLiteTrustchainExtractor(DB_DIR, OFFSET)
     neo_db = Neo4JDB(NEO_URL, NEO_USER, NEO_PASS)
-    if not neo_db.create_indexes():
-        print("Cannot create index on neo database ")
-        exit(1)
-
     if not sql_db.is_connected():
         print("Cannot open sqlite database @ " + str(DB_DIR))
+        exit(1)
+
+    if not neo_db.create_indexes():
+        print("Cannot create index on neo database ")
         exit(1)
 
     while True:
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         neo_db_push = time()
         if not neo_db.push_batch(map(TrustChainBlock2Dict.transform, res)):
             sql_db.close_connection()
-            print("Cannot push to neo4j database @ "+str(NEO_URL)+str((NEO_USER, NEO_PASS)))
+            print("Cannot push to neo4j database @ " + str(NEO_URL) + str((NEO_USER, NEO_PASS)))
             break
         total_read += TX_COUNT
         total_pushed += len(res)
